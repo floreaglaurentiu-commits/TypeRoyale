@@ -1,0 +1,4 @@
+node_modules/
+build/
+rojo-windows.zip
+npm-debug.log*

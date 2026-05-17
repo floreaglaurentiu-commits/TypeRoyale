@@ -3,6 +3,7 @@
 
 local Players = game:GetService("Players")
 local ClientMatchController = require(script.Parent.Parent.Controllers.ClientMatchController)
+local MatchUIController = require(script.Parent.MatchUIController)
 
 local MainMenuController = {}
 local screenGui
@@ -56,14 +57,32 @@ function MainMenuController.Mount()
 	corner.Parent = playButton
 	
 	playButton.Parent = background
-	
+
+	local offlineButton = playButton:Clone()
+	offlineButton.Name = "OfflineButton"
+	offlineButton.Position = UDim2.fromScale(0.4, 0.62)
+	offlineButton.Text = "OFFLINE TEST MODE"
+	offlineButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+	offlineButton.Parent = background
+
 	-- Logic
 	playButton.MouseButton1Click:Connect(function()
 		playButton.Text = "SEARCHING..."
 		playButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
 		ClientMatchController.JoinQueue()
 	end)
-	
+
+	offlineButton.MouseButton1Click:Connect(function()
+		offlineButton.Text = "STARTING..."
+		offlineButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+		
+		-- Unmount menu and mount match UI before starting offline match
+		task.wait(0.1)
+		MainMenuController.Unmount()
+		MatchUIController.Mount()
+		ClientMatchController.StartOfflineMatch("The quick brown fox jumps over the lazy dog.")
+	end)
+
 	screenGui.Parent = playerGui
 end
 

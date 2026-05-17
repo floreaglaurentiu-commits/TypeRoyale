@@ -1,0 +1,17 @@
+{
+  "name": "version1",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "mkdir build && npx rojo build default.project.json --output build/TypeRoyale.rbxlx",
+    "serve": "npx rojo serve default.project.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "rojo": "^1.0.2"
+  }
+}

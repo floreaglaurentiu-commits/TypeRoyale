@@ -11,6 +11,29 @@ local elements = {}
 function MatchUIController.Mount()
 	local player = Players.LocalPlayer
 	local playerGui = player:WaitForChild("PlayerGui")
+	local camera = workspace.CurrentCamera
+	
+	-- Hide and freeze player character
+	if player.Character then
+		local humanoid = player.Character:FindFirstChild("Humanoid")
+		if humanoid then
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, false)
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying, false)
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
+		end
+		
+		for _, part in pairs(player.Character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+				part.Transparency = 1
+			end
+		end
+	end
+	
+	-- Lock camera to center
+	camera.CFrame = CFrame.new(0, 10, 15)
+	camera.CameraType = Enum.CameraType.Fixed
 	
 	if playerGui:FindFirstChild("TypeRoyaleMatchHUD") then
 		playerGui.TypeRoyaleMatchHUD:Destroy()
@@ -25,6 +48,18 @@ function MatchUIController.Mount()
 	hud.Size = UDim2.fromScale(1, 1)
 	hud.BackgroundTransparency = 1
 	hud.Parent = screenGui
+	
+	-- Countdown Timer (Above typing area)
+	local countdownLabel = Instance.new("TextLabel")
+	countdownLabel.Name = "CountdownLabel"
+	countdownLabel.Size = UDim2.fromScale(0.3, 0.1)
+	countdownLabel.Position = UDim2.fromScale(0.35, 0.2)
+	countdownLabel.BackgroundTransparency = 1
+	countdownLabel.TextColor3 = Color3.fromRGB(255, 150, 0)
+	countdownLabel.TextScaled = true
+	countdownLabel.Font = Enum.Font.GothamBlack
+	countdownLabel.Text = "5"
+	countdownLabel.Parent = hud
 	
 	-- Typing Area (Center)
 	local typingFrame = Instance.new("Frame")
@@ -88,6 +123,7 @@ function MatchUIController.Mount()
 	elements.wpmLabel = wpmLabel
 	elements.accLabel = accLabel
 	elements.comboLabel = comboLabel
+	elements.countdownLabel = countdownLabel
 	
 	screenGui.Parent = playerGui
 	
@@ -98,9 +134,28 @@ function MatchUIController.Mount()
 		comboLabel.Text = "COMBO: x" .. tostring(combo)
 	end
 	
-	ClientMatchController.OnTextProgressRequired = function(typed, remaining)
-		-- Using RichText to highlight typed portion (e.g. purple highlight)
-		textDisplay.Text = string.format("<font color=\"#8A2BE2\">%s</font>%s", typed, remaining)
+	ClientMatchController.OnTextProgressRequired = function(typed, remaining, mistakeIndices)
+		-- Build colored text with mistakes in red
+		local typedWithColor = ""
+		for i = 1, string.len(typed) do
+			local char = string.sub(typed, i, i)
+			if mistakeIndices and mistakeIndices[i] then
+				typedWithColor = typedWithColor .. "<font color=\"#FF0000\">" .. char .. "</font>"
+			else
+				typedWithColor = typedWithColor .. "<font color=\"#8A2BE2\">" .. char .. "</font>"
+			end
+		end
+		textDisplay.Text = typedWithColor .. remaining
+	end
+	
+	ClientMatchController.OnCountdown = function(secondsRemaining)
+		if secondsRemaining > 0 then
+			countdownLabel.Text = tostring(secondsRemaining)
+		else
+			countdownLabel.Text = "GO!"
+			task.wait(0.5)
+			countdownLabel.Visible = false
+		end
 	end
 	
 	ClientMatchController.OnMatchEnded = function(winnerName)
@@ -115,6 +170,30 @@ function MatchUIController.Unmount()
 		screenGui = nil
 		elements = {}
 	end
+	
+	-- Restore player character and movement
+	local player = Players.LocalPlayer
+	local camera = workspace.CurrentCamera
+	
+	if player.Character then
+		local humanoid = player.Character:FindFirstChild("Humanoid")
+		if humanoid then
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying, true)
+			humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, true)
+		end
+		
+		for _, part in pairs(player.Character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = true
+				part.Transparency = 0
+			end
+		end
+	end
+	
+	-- Restore camera
+	camera.CameraType = Enum.CameraType.Custom
 end
 
 return MatchUIController

@@ -3,7 +3,7 @@
 
 local TypingFeedback = {}
 
-function TypingFeedback.PlayCorrectHit(combo: number)
+function TypingFeedback.PlayCorrectHit(_combo: number)
 	-- In the full game, play a mechanical switch sound here
 	-- scale pitch or intensity based on combo
 	-- Example: SoundService:PlayLocalSound(switchSound)
