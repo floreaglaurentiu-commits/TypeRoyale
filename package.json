@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "npx rojo build default.project.json --output build/TypeRoyale.rbxlx",
+    "build": "npx mkdirp build && npx rojo build default.project.json --output build/TypeRoyale.rbxlx",
     "serve": "npx rojo serve default.project.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
