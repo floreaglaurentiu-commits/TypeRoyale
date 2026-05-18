@@ -22,4 +22,13 @@ GameConfig.AntiCheat = {
 	MIN_KEYSTROKE_INTERVAL_MS = 20, -- Instantly flag if keys are pressed faster than this
 }
 
+GameConfig.Practice = {
+	BotSpeeds = { Easy = 30, Medium = 60, Hard = 90, Insane = 120 }, -- WPM target speeds
+	CountdownDuration = 3,
+	DefaultCategory = "Quotes",
+	DefaultDifficulty = "Normal",
+	BlockOnError = false, -- If true, player cannot type past a mistake without backspacing (Monkeytype style)
+}
+
 return GameConfig
+

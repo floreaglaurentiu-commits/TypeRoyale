@@ -1,5 +1,6 @@
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
 
 local KeyboardHandler = {}
 local onKeyPressedCallback = nil
@@ -7,11 +8,17 @@ local isCapturing = false
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+local playerScripts = player:WaitForChild("PlayerScripts")
+
+-- Safely get controls
+local PlayerModule = require(playerScripts:WaitForChild("PlayerModule"))
+local playerControls = PlayerModule:GetControls()
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "TypeRoyale_InputCapture"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
+
 
 local captureBox = Instance.new("TextBox")
 captureBox.Size = UDim2.fromScale(0, 0)
@@ -58,6 +65,18 @@ UserInputService.InputBegan:Connect(function(input, _gameProcessedEvent)
 	end
 end)
 
+-- Recapture focus on click/tap anywhere on the screen
+UserInputService.InputBegan:Connect(function(input, _gameProcessedEvent)
+	if not isCapturing then return end
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		task.defer(function()
+			if isCapturing and not captureBox:IsFocused() then
+				captureBox:CaptureFocus()
+			end
+		end)
+	end
+end)
+
 captureBox.FocusLost:Connect(function()
 	if isCapturing then
 		task.defer(function()
@@ -74,6 +93,14 @@ function KeyboardHandler.Enable()
 	if isCapturing then return end
 	isCapturing = true
 	captureBox.Text = ""
+	
+	-- Disable controls, chat, emotes
+	pcall(function()
+		playerControls:Disable()
+		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, false)
+		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
+	end)
+	
 	task.defer(function()
 		captureBox:CaptureFocus()
 	end)
@@ -83,6 +110,12 @@ function KeyboardHandler.Disable()
 	if not isCapturing then return end
 	isCapturing = false
 	captureBox:ReleaseFocus()
+	
+	-- Enable controls back (but keep screens completely clean and immersive!)
+	pcall(function()
+		playerControls:Enable()
+	end)
 end
 
 return KeyboardHandler
+

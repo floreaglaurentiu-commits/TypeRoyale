@@ -4,6 +4,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Events = require(ReplicatedStorage.Shared.Networking.Events)
 local Validation = require(script.Parent.Parent.Validation.ServerTypingValidation)
+local TextBank = require(ReplicatedStorage.Shared.Typing.TextBank)
 
 local MatchStartEvent = Events.GetEvent("MatchStart")
 local MatchProgressEvent = Events.GetEvent("MatchProgress")
@@ -29,8 +30,8 @@ function MatchService.StartMatch(player1: Player, player2: Player)
 	Validation.InitializePlayer(player1)
 	Validation.InitializePlayer(player2)
 	
-	-- Sample text for Phase 1. Later, this should come from TextBank.
-	local matchText = "In the midst of chaos, there is also opportunity."
+	-- Fetch a clean, punctuation-free random quote from TextBank
+	local matchText = TextBank.GetRandomText("Quotes", "Normal")
 	
 	-- Notify clients
 	MatchStartEvent:FireClient(player1, { opponent = player2.Name, text = matchText })
